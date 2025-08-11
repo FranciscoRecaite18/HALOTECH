@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import SiteHeader from "@/components/site-header"
@@ -20,15 +21,13 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
     setLoading(true)
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+    const { data, error: supaError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     })
-    const data = await res.json()
     setLoading(false)
-    if (!res.ok) {
-      setError(data?.error ?? "Error de autenticación")
+    if (supaError) {
+      setError(supaError.message ?? "Error de autenticación")
       return
     }
     router.push("/admin")
